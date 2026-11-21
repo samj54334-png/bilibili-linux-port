@@ -23,6 +23,12 @@
 curl -fsSL https://raw.githubusercontent.com/samj54334-png/bilibili-linux-port/main/build.sh | bash
 ```
 
+没装 curl 的话用 wget：
+
+```sh
+wget -qO- https://raw.githubusercontent.com/samj54334-png/bilibili-linux-port/main/build.sh | bash
+```
+
 或者克隆后按需构建：
 
 ```sh
