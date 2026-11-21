@@ -1,0 +1,45 @@
+#!/bin/sh
+# 哔哩哔哩 PC 客户端（官方 Windows 版）的 Linux 启动器
+#
+# 官方客户端是 Electron 应用，主进程里用 process.platform 判断平台，
+# 非 win32 一律走 macOS 分支，因此需要：
+#   1. shim/sw_vers 伪装 macOS 版本探测；
+#   2. 清掉 .runtime 里的 localServer（Windows 本地服务），否则会被误判为“已有实例”而直接退出。
+
+set -e
+
+SELF=$0
+while [ -h "$SELF" ]; do
+  DIR=$(cd -P "$(dirname "$SELF")" >/dev/null 2>&1 && pwd)
+  SELF=$(readlink "$SELF")
+  case $SELF in /*) ;; *) SELF=$DIR/$SELF ;; esac
+done
+ROOT=$(cd -P "$(dirname "$SELF")/.." >/dev/null 2>&1 && pwd)
+
+DATA_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/bilibili
+RUNTIME_FILE=$DATA_DIR/.runtime
+
+# 官方客户端在 Windows 上会启动 http://localhost:22331 本地服务，
+# 并用它判断“是否已有实例在运行”。Linux 上该服务不存在，
+# 残留这条记录会让启动器直接退出，所以在启动前剥掉。
+if [ -f "$RUNTIME_FILE" ]; then
+  sed -i 's#http://localhost:22331##g' "$RUNTIME_FILE" 2>/dev/null || true
+fi
+
+# electron-updater 需要这两个变量才会走 AppImage 分支；官方更新源仍会 404，
+# 但错误是非致命的，仅打日志。
+export ELECTRON_FORCE_IS_PACKAGED=true
+export APPIMAGE=1
+
+# 让客户端里的 execSync('sw_vers') 能找到垫片
+export PATH="$ROOT/shim:$PATH"
+
+# Ubuntu 23.10+ 默认 apparmor_restrict_unprivileged_userns=1，
+# Electron 的内置沙箱在非打包目录下会启动失败；装了 setuid 的
+# chrome-sandbox 时才启用沙箱。
+SANDBOX=
+if [ ! -u "$ROOT/runtime/chrome-sandbox" ]; then
+  SANDBOX=--no-sandbox
+fi
+
+exec "$ROOT/runtime/electron" "$ROOT/app/app.asar" $SANDBOX "$@"

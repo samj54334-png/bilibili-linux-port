@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=哔哩哔哩
+GenericName=Bilibili
+Comment=哔哩哔哩 PC 客户端（Linux 移植版）
+Comment[zh_CN]=看 B 站，用官方客户端
+Exec=bililinux %U
+Icon=bililinux
+Terminal=false
+Categories=AudioVideo;Video;Network;
+Keywords=bilibili;b站;哔哩哔哩;video;
+StartupNotify=true
+StartupWMClass=哔哩哔哩

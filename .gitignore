@@ -1,0 +1,12 @@
+# 构建产物与官方二进制，绝不可提交
+*.deb
+*.AppImage
+*.asar
+*.asar.unpacked/
+*.exe
+*.7z
+app/
+runtime/
+dist/
+out.squashfs
+node_modules/

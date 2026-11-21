@@ -1,0 +1,12 @@
+#!/bin/sh
+# Linux 上伪装 macOS 的 sw_vers，供哔哩哔哩客户端探测系统版本
+case "$1" in
+  -productVersion) echo "14.5" ;;
+  -buildVersion)   echo "23F79" ;;
+  -productName)    echo "macOS" ;;
+  *)
+    printf 'ProductName:\t\tmacOS\n'
+    printf 'ProductVersion:\t\t14.5\n'
+    printf 'BuildVersion:\t\t23F79\n'
+    ;;
+esac
