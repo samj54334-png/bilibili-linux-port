@@ -15,6 +15,45 @@
 2. 用同版本的 **Linux** Electron 运行时加载这个 asar
 3. 补三处平台差异（见下），其余原样运行
 
+## 一键构建（推荐）
+
+官方安装包由**你自己**从官方源下载，脚本只在你机器上做转换。仓库里不含任何官方代码。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/samj54334-png/bilibili-linux-port/main/build.sh | bash
+```
+
+或者克隆后按需构建：
+
+```sh
+git clone https://github.com/samj54334-png/bilibili-linux-port.git
+cd bilibili-linux-port
+
+./build.sh                                  # 自动选格式，产物在当前目录
+./build.sh --format appimage --install      # 构建 AppImage 并装到 ~/.local/bin
+./build.sh --format deb --install           # 构建 deb 并安装（需要 sudo）
+./build.sh --format portable --out ~/Downloads
+./build.sh --arch arm64 --format appimage   # 交叉构建 arm64（需要对应运行时，见下）
+```
+
+| 选项 | 说明 |
+|---|---|
+| `--format appimage\|deb\|portable\|auto` | 目标格式，`auto` 按系统判断（Debian 系出 deb，否则有 mksquashfs 出 AppImage，再否则便携包） |
+| `--arch auto\|x64\|arm64` | 目标架构，默认本机 |
+| `--out DIR` | 产物目录，默认当前目录 |
+| `--install` | 构建后立即安装 |
+| `--keep` | 保留中间文件（排查用） |
+
+脚本会自动完成：下载官方安装包并校验 sha256 → 解 NSIS（自动获取 7-Zip 23，系统自带的 p7zip 16 解不了新版 NSIS）→ 取 `app.asar` → 下载对应架构的 Linux Electron 运行时 → 拼装目标格式。
+
+细节：
+
+- 依赖：`unzip` +（`curl` 或 `wget`）；AppImage 需要 `squashfs-tools`，deb 需要 `dpkg-deb`
+- 缓存：安装包、运行时、7-Zip 都放在 `~/.cache/bililinux-build`，重复构建不再下载
+- 网络：到 GitHub 的 IPv6 路由不通时，脚本会自动退回 IPv4 重试
+- 产物含官方客户端代码，**仅供本机使用，不要再分发**
+- `--arch arm64` 交叉构建需要 arm64 的 Electron 运行时（脚本会下载）；在 x86 机器上只能构建、不能实跑
+
 ## 需要修补的三处
 
 | 现象 | 原因 | 处理 |
